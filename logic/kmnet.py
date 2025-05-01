@@ -1,40 +1,33 @@
 import importlib.util
 import os
-import time, random
+import time
+import random
 from logic.config_watcher import cfg
 
-class KMBoxMouse:
-    def __init__(self):
-        module_path = cfg.kmnet_module_path
-        module_name = os.path.splitext(os.path.basename(module_path))[0]
-        spec = importlib.util.spec_from_file_location(module_name, module_path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        self.kmNet = module
-        # Initialize the KMNet connection
-        self.kmNet.init(cfg.kmnet_ip, cfg.kmnet_port, cfg.kmnet_uuid)
-        # Enable keyboard and mouse monitoring
-        self.kmNet.monitor(cfg.kmnet_monitor_rate)
+# Load the KMNet extension as a module-level singleton
+module_path = cfg.kmnet_module_path
+module_name = os.path.splitext(os.path.basename(module_path))[0]
+spec = importlib.util.spec_from_file_location(module_name, module_path)
+kmNet = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(kmNet)
 
-    def random_delay(self, min_delay=0.1, max_delay=0.2):
-        time.sleep(random.uniform(min_delay, max_delay))
+# Initialize KMNet connection
+kmNet.init(cfg.kmnet_ip, cfg.kmnet_port, cfg.kmnet_uuid)
+kmNet.monitor(cfg.kmnet_monitor_rate)
 
-    def click(self):
-        self.kmNet.left(1)
-        self.random_delay()
-        self.kmNet.left(0)
+def kmnet_move(x, y):
+    kmNet.move(x, y)
 
-    def press(self):
-        self.kmNet.left(1)
+def kmnet_press():
+    kmNet.left(1)
 
-    def release(self):
-        self.kmNet.left(0)
+def kmnet_release():
+    kmNet.left(0)
 
-    def move(self, x, y):
-        self.kmNet.move(x, y)
+def kmnet_click():
+    kmNet.left(1)
+    time.sleep(random.uniform(0.1, 0.2))
+    kmNet.left(0)
 
-    def close(self):
-        self.kmNet.reboot()
-
-    def __del__(self):
-        self.close()
+def kmnet_close():
+    kmNet.reboot()
