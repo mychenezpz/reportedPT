@@ -16,6 +16,8 @@ if cfg.mouse_rzr:
 if cfg.arduino_move or cfg.arduino_shoot:
     from logic.arduino import arduino
 
+from .kmnet import KMBoxMouse
+
 class MouseThread:
     def __init__(self):
         self.initialize_parameters()
@@ -63,6 +65,9 @@ class MouseThread:
             self.rzr = RZCONTROL(dll_path)
             if not self.rzr.init():
                 logger.error("Failed to initialize rzctl")
+
+        if cfg.use_kmnet:
+            self.kmnet = KMBoxMouse()
 
     def process_data(self, data):
         if isinstance(data, sv.Detections):
@@ -196,7 +201,9 @@ class MouseThread:
         shooting_state = self.get_shooting_key_state()
 
         if shooting_state or cfg.mouse_auto_aim:
-            if not cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr:
+            if hasattr(self, 'kmnet'):
+                self.kmnet.move(x, y)
+            elif not cfg.mouse_ghub and not cfg.arduino_move and not cfg.mouse_rzr:
                 win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(x), int(y), 0, 0)
             elif cfg.mouse_ghub:
                 self.ghub.mouse_xy(int(x), int(y))

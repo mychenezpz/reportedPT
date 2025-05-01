@@ -73,6 +73,9 @@ class Config():
         self.mouse_auto_aim = self.config_Mouse.getboolean("mouse_auto_aim")
         self.mouse_ghub = self.config_Mouse.getboolean("mouse_ghub")
         self.mouse_rzr = self.config_Mouse.getboolean("mouse_rzr")
+        # KMNet Python extension
+        self.use_kmnet = self.config_Mouse.getboolean("use_kmnet")
+        self.kmnet_module_path = self.config_Mouse.get("kmnet_module_path", "")
         
         # Shooting
         self.config_Shooting = self.config["Shooting"]

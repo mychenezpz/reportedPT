@@ -13,7 +13,9 @@ if cfg.mouse_rzr:
 
 if cfg.arduino_move or cfg.arduino_shoot:
     from logic.arduino import arduino
-    
+if cfg.use_kmnet:
+    from logic.kmnet import KMBoxMouse
+
 class Shooting(threading.Thread):
     def __init__(self):
         super(Shooting, self).__init__()
@@ -33,6 +35,8 @@ class Shooting(threading.Thread):
             
             if not self.rzr.init():
                 logger.error("[Shooting] Failed to initialize rzctl")
+        if cfg.use_kmnet:
+            self.kmnet = KMBoxMouse()
             
     def run(self):
         while True:
@@ -48,7 +52,9 @@ class Shooting(threading.Thread):
             if cfg.auto_shoot and not cfg.triggerbot:
                 if shooting_state and bScope or cfg.mouse_auto_aim and bScope:
                     if not self.button_pressed:
-                        if cfg.mouse_rzr:  # Razer
+                        if cfg.use_kmnet:  # KMNet
+                            self.kmnet.press()
+                        elif cfg.mouse_rzr:  # Razer
                             self.rzr.mouse_click(MOUSE_CLICK.LEFT_DOWN)
                         elif cfg.mouse_ghub:  # ghub
                             self.ghub.mouse_down()
@@ -60,7 +66,9 @@ class Shooting(threading.Thread):
                         self.button_pressed = True
 
             if not shooting_state and self.button_pressed or not bScope and self.button_pressed:
-                if cfg.mouse_rzr:  # Razer
+                if cfg.use_kmnet:  # KMNet
+                    self.kmnet.release()
+                elif cfg.mouse_rzr:  # Razer
                     self.rzr.mouse_click(MOUSE_CLICK.LEFT_UP)
                 elif cfg.mouse_ghub:  # ghub
                     self.ghub.mouse_up()
@@ -86,7 +94,9 @@ class Shooting(threading.Thread):
         # By triggerbot
         if cfg.auto_shoot and cfg.triggerbot and bScope or cfg.mouse_auto_aim and bScope:
             if not self.button_pressed:
-                if cfg.mouse_rzr:  # Razer
+                if cfg.use_kmnet:  # KMNet
+                    self.kmnet.press()
+                elif cfg.mouse_rzr:  # Razer
                     self.rzr.mouse_click(MOUSE_CLICK.LEFT_DOWN)
                 elif cfg.mouse_ghub:  # ghub
                     self.ghub.mouse_down()
@@ -99,7 +109,9 @@ class Shooting(threading.Thread):
 
         if cfg.auto_shoot and cfg.triggerbot and not bScope:
             if self.button_pressed:
-                if cfg.mouse_rzr:  # Razer
+                if cfg.use_kmnet:  # KMNet
+                    self.kmnet.release()
+                elif cfg.mouse_rzr:  # Razer
                     self.rzr.mouse_click(MOUSE_CLICK.LEFT_UP)
                 elif cfg.mouse_ghub:  # ghub
                     self.ghub.mouse_up()
